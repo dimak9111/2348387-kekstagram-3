@@ -1,3 +1,1 @@
-import { genPhotoArray } from './data.js';
-
-genPhotoArray();
+import './draw.js';
