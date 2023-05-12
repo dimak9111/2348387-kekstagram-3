@@ -1,115 +1,50 @@
-const uploadForm = document.querySelector('.img-upload__form');
-const overlay = uploadForm.querySelector('.img-upload__overlay');
-
-const buttonSmaller = uploadForm.querySelector('.scale__control--smaller');
-const buttonBigger = uploadForm.querySelector('.scale__control--bigger');
-const buttons = document.querySelectorAll('.effects__radio');
-
-const scale = uploadForm.querySelector('.scale__control--value');
-const previewPicture = uploadForm.querySelector('.img-upload__preview img');
+import { initScaleEditor } from './scale-editor.js';
+import { initEffectController, resetEffectController } from './slider.js';
 
 
-const shrink = (evt) => {
-  evt.preventDefault();
+const uploadFileElement = document.querySelector('#upload-file');
+const closeFormElement = document.querySelector('#upload-cancel');
+const hashtagInputElement = document.querySelector('.text__hashtags');
+const commentInputElement = document.querySelector('.text__description');
 
-  let value = parseInt(scale.value, 10);
-  value = (value >= 50) ? value - 25 : 25;
-  scale.value = `${value}%`;
-  previewPicture.style.transform = `scale(${value/100})`;
+
+const cleaningForm = () => {
+  uploadFileElement.value = '';
+  hashtagInputElement.value = '';
+  commentInputElement.value = '';
+  resetEffectController();
 };
 
-const enLarge = (evt) => {
-  evt.preventDefault();
-
-  let value = parseInt(scale.value, 10);
-  value = (value <= 75) ? value + 25 : 100;
-  scale.value = `${value}%`;
-  previewPicture.style.transform = `scale(${value/100})`;
+const openDownloadPicWindow = () => {
+  document.querySelector('.img-upload__overlay').classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  document.addEventListener('keydown', onFormEscapeKeyDown);
 };
 
-
-const removeFilters = (evt) => {
-  evt.preventDefault();
-
-  previewPicture.classList = [];
-};
-
-function changeFilterFactory(elem) {
-  const currentElem = elem;
-  const changeFilter = (evt) => {
-    evt.preventDefault();
-
-    previewPicture.classList = [];
-    previewPicture.classList.add(`effects__preview--${currentElem.value}`);
-  };
-  return changeFilter;
+function closeDownloadPicWindow() {
+  document.querySelector('.img-upload__overlay').classList.add('hidden');
+  document.body.classList.remove('modal-open');
+  document.removeEventListener('keydown', onFormEscapeKeyDown);
+  cleaningForm();
 }
 
-const addListener = (elem) => {
-  if (elem.value === 'none') {
-    elem.addEventListener('click', removeFilters);
-  } else {
-    elem.addEventListener('click', changeFilterFactory(elem));
-  }
-};
-
-const removeListener = () => {
-  buttons.forEach((element) => {
-    if (element.value === 'none') {
-      element.removeEventListener('click', removeFilters);
-    } else {
-      element.removeEventListener('click', changeFilterFactory(element));
-    }
-  });
-};
-
-const makeListeners = () => {
-  buttons.forEach((element) => addListener(element));
-};
-
-
-const closeOnButton = (evt) => {
+function onFormEscapeKeyDown(evt){
   if (evt.key === 'Escape') {
     evt.preventDefault();
-    closeWindow();
+    closeDownloadPicWindow();
   }
-};
-
-function openWindow() {
-  overlay.classList.remove('hidden');
-  document.body.classList.add('modal-open');
-  document.addEventListener('keydown', closeOnButton);
-  buttonSmaller.addEventListener('click', shrink);
-  buttonBigger.addEventListener('click', enLarge);
-  makeListeners();
 }
 
-function closeWindow() {
-  overlay.classList.add('hidden');
-  document.body.classList.remove('modal-open');
-  document.removeEventListener('keydown', closeOnButton);
-  cleanForm();
-  removeListener();
-}
+initScaleEditor();
+initEffectController();
 
-uploadForm.addEventListener('change', (evt) => {
-  evt.preventDefault();
-
-  openWindow();
+//init form
+uploadFileElement.addEventListener('change', () => {
+  openDownloadPicWindow();
 });
 
-const closeButton = uploadForm.querySelector('#upload-cancel');
-
-closeButton.addEventListener('click', (evt) => {
-  evt.preventDefault();
-
-  closeWindow();
+closeFormElement.addEventListener('click', () => {
+  closeDownloadPicWindow();
 });
 
-
-function cleanForm() {
-  document.querySelector('#upload-file').value = '';
-  document.querySelector('.text__hashtags').value = '';
-  document.querySelector('.text__description').value = '';
-}
-
+export {openDownloadPicWindow, closeDownloadPicWindow };
